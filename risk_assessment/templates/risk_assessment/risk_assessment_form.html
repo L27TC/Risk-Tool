@@ -1,0 +1,22 @@
+from django import forms
+from .models import RiskAssessment
+
+class GeneralInfoForm(forms.ModelForm):
+    class Meta:
+        model = RiskAssessment
+        fields = ['title', 'description']
+
+class RiskDetailsForm(forms.ModelForm):
+    class Meta:
+        model = RiskAssessment
+        fields = ['risk_level', 'assets', 'controls']
+
+class ImpactForm(forms.ModelForm):
+    class Meta:
+        model = RiskAssessment
+        fields = ['potential_impact', 'risk_drivers']
+
+class RecommendationsForm(forms.ModelForm):
+    class Meta:
+        model = RiskAssessment
+        fields = ['recommended_treatments']

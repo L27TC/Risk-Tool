@@ -1,0 +1,19 @@
+<!-- risk_assessment_list.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Risk Assessment List</title>
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'css/styles.css' %}">
+</head>
+<body>
+    <h1>Risk Assessment List</h1>
+    <ul>
+        {% for assessment in assessments %}
+            <li>{{ assessment.title }} - {{ assessment.description }}</li>
+        {% endfor %}
+    </ul>
+    <a href="{% url 'risk_assessment_create' %}">Create New Risk Assessment</a>
+</body>
+</html>

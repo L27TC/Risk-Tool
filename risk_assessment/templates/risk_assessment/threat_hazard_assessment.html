@@ -1,0 +1,488 @@
+<!DOCTYPE html>
+<html lang="en-US">
+<head>
+    {% load static %}
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="description" content="Risk Management System">
+    <meta name="version" content="1.0">
+    <meta http-equiv="Cache-control" content="public">
+    <title>Threat/Hazard Assessment | Risk Assessment</title>
+    <link rel="shortcut icon" href="{% static 'favicon.ico' %}">
+    <link rel="icon" type="image/x-icon" href="{% static 'favicon.ico' %}">
+    <link href="{% static 'css/icons.css' %}" rel="stylesheet">
+    <link href="{% static 'css/app-min.css' %}" rel="stylesheet">
+    <link rel="stylesheet" type="text/css" href="{% static 'css/site_min_v7.css' %}">
+</head>
+<body class="assessment-view toggle-sidebar">
+
+<header>
+    <!-- Your header content here -->
+</header>
+<div class="admin-body" style="padding-top: 47.3854px;">
+    <div class="container-fluid mrg_btm_containerfluid">
+        <div class="animated fade-in">
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="card">
+                        <div class="card-header headingOne pl-3 border-bottom-0">
+                            <div class="row align-items-center">
+                                <div class="col-md-6 d-flex justify-content-start">
+                                    <h5 class="card-title mt-1">Threat/Hazard Assessment</h5>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card-block">
+                            <form method="post" action="{% url 'save_threat_hazard_assessment' %}">
+                                {% csrf_token %}
+                                <div class="row">
+                                    <div class="col-md-12">
+                                        <table class="table">
+                                            <thead>
+                                                <tr>
+                                                    <th>Source</th>
+                                                    <th>Actor/Hazard</th>
+                                                    <th>Act/Event</th>
+                                                    <th>Primary Assets at Risk</th>
+                                                    <th>Rating</th>
+                                                    <th>Description</th>
+                                                    <th>Current Controls</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody id="threat-hazard-table">
+                                                {% for assessment in threat_hazard_assessments %}
+                                                <tr>
+                                                    <td>{{ assessment.source }}</td>
+                                                    <td>{{ assessment.actor }}</td>
+                                                    <td><input type="text" name="events[]" class="form-control" value="{{ assessment.event }}"></td>
+                                                    <td>
+                                                        <select name="assets[]" class="form-control">
+                                                            {% for asset in asset_assessments %}
+                                                                <option value="{{ asset.asset }}" {% if asset.asset == assessment.asset %}selected{% endif %}>{{ asset.asset }}</option>
+                                                            {% endfor %}
+                                                        </select>
+                                                    </td>
+                                                    <td>
+                                                        <button type="button" class="btn btn-secondary" onclick="openRatingPopup(this)">Set Rating</button>
+                                                        <input type="hidden" name="ratings[]" class="rating-value" value="{{ assessment.rating }}">
+                                                    </td>
+                                                    <td><input type="text" name="descriptions[]" class="form-control" value="{{ assessment.description }}"></td>
+                                                    <td><input type="text" name="current_controls[]" class="form-control" value="{{ assessment.current_controls }}"></td>
+                                                </tr>
+                                                {% endfor %}
+                                            </tbody>
+                                        </table>
+                                        <button type="button" class="btn btn-info" onclick="openPopup('popup-threat-library')">Load from Threat Library</button>
+                                        <button type="button" class="btn btn-info" onclick="openPopup('popup-hazard-library')">Load from Hazard Library</button>
+                                    </div>
+                                </div>
+                                <div class="row mt-3">
+                                    <div class="col-md-6">
+                                        <a class="btn btn-secondary" href="{% url 'asset_assessments' %}">Previous</a>
+                                    </div>
+                                    <div class="col-md-6 text-right">
+                                        <button type="submit" class="btn btn-primary">Next</button>
+                                    </div>
+                                </div>
+                            </form>
+
+                            <!-- Pop-up for Threat Library -->
+                            <div id="popup-threat-library" class="popup">
+                                <div class="popup-content">
+                                    <span class="close" onclick="closePopup('popup-threat-library')">&times;</span>
+                                    <h2>Load from Threat Library</h2>
+                                    <form id="threat-library-form">
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="checkbox" value="Cybercriminals" id="cybercriminals">
+                                            <label class="form-check-label" for="cybercriminals">Cybercriminals</label>
+                                        </div>
+                                        <div class="ml-4">
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="checkbox" value="Cyberstalking" id="cyberstalking">
+                                                <label class="form-check-label" for="cyberstalking">Cyberstalking</label>
+                                            </div>
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="checkbox" value="DoS/DDoS attack" id="dos-ddos-attack">
+                                                <label class="form-check-label" for="dos-ddos-attack">DoS/DDoS attack</label>
+                                            </div>
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="checkbox" value="Eavesdropping" id="eavesdropping">
+                                                <label class="form-check-label" for="eavesdropping">Eavesdropping</label>
+                                            </div>
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="checkbox" value="Hacking" id="hacking">
+                                                <label class="form-check-label" for="hacking">Hacking</label>
+                                            </div>
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="checkbox" value="Identity theft" id="identity-theft">
+                                                <label class="form-check-label" for="identity-theft">Identity theft</label>
+                                            </div>
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="checkbox" value="Man in the Middle attack" id="man-in-the-middle-attack">
+                                                <label class="form-check-label" for="man-in-the-middle-attack">Man in the Middle attack</label>
+                                            </div>
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="checkbox" value="Password attack" id="password-attack">
+                                                <label class="form-check-label" for="password-attack">Password attack</label>
+                                            </div>
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="checkbox" value="Phishing/Spear Phishing attack" id="phishing-attack">
+                                                <label class="form-check-label" for="phishing-attack">Phishing/Spear Phishing attack</label>
+                                            </div>
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="checkbox" value="Ransomware" id="ransomware">
+                                                <label class="form-check-label" for="ransomware">Ransomware</label>
+                                            </div>
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="checkbox" value="XSS attack" id="xss-attack">
+                                                <label class="form-check-label" for="xss-attack">XSS attack</label>
+                                            </div>
+                                        </div>
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="checkbox" value="Issue Motivated Groups" id="issue-motivated-groups">
+                                            <label class="form-check-label" for="issue-motivated-groups">Issue Motivated Groups</label>
+                                        </div>
+                                        <div class="ml-4">
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="checkbox" value="Non-violent protest" id="non-violent-protest">
+                                                <label class="form-check-label" for="non-violent-protest">Non-violent protest</label>
+                                            </div>
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="checkbox" value="Violent protest" id="violent-protest">
+                                                <label class="form-check-label" for="violent-protest">Violent protest</label>
+                                            </div>
+                                        </div>
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="checkbox" value="Petty Criminals" id="petty-criminals">
+                                            <label class="form-check-label" for="petty-criminals">Petty Criminals</label>
+                                        </div>
+                                        <div class="ml-4">
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="checkbox" value="Break, enter and steal" id="break-enter-steal">
+                                                <label class="form-check-label" for="break-enter-steal">Break, enter and steal</label>
+                                            </div>
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="checkbox" value="Disorderly conduct" id="disorderly-conduct">
+                                                <label class="form-check-label" for="disorderly-conduct">Disorderly conduct</label>
+                                            </div>
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="checkbox" value="Malicious damage" id="malicious-damage">
+                                                <label class="form-check-label" for="malicious-damage">Malicious damage</label>
+                                            </div>
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="checkbox" value="Trespass" id="trespass">
+                                                <label class="form-check-label" for="trespass">Trespass</label>
+                                            </div>
+                                        </div>
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="checkbox" value="Serious & Organised Criminals" id="serious-organised-criminals">
+                                            <label class="form-check-label" for="serious-organised-criminals">Serious & Organised Criminals</label>
+                                        </div>
+                                        <div class="ml-4">
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="checkbox" value="Armed robbery" id="armed-robbery">
+                                                <label class="form-check-label" for="armed-robbery">Armed robbery</label>
+                                            </div>
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="checkbox" value="Arson" id="arson">
+                                                <label class="form-check-label" for="arson">Arson</label>
+                                            </div>
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="checkbox" value="Assault" id="assault">
+                                                <label class="form-check-label" for="assault">Assault</label>
+                                            </div>
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="checkbox" value="Kidnap" id="kidnap">
+                                                <label class="form-check-label" for="kidnap">Kidnap</label>
+                                            </div>
+                                        </div>
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="checkbox" value="State Intelligence Services" id="state-intelligence-services">
+                                            <label class="form-check-label" for="state-intelligence-services">State Intelligence Services</label>
+                                        </div>
+                                        <div class="ml-4">
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="checkbox" value="Espionage" id="espionage">
+                                                <label class="form-check-label" for="espionage">Espionage</label>
+                                            </div>
+                                        </div>
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="checkbox" value="Terrorists" id="terrorists">
+                                            <label class="form-check-label" for="terrorists">Terrorists</label>
+                                        </div>
+                                        <div class="ml-4">
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="checkbox" value="Armed shooter attack" id="armed-shooter-attack">
+                                                <label class="form-check-label" for="armed-shooter-attack">Armed shooter attack</label>
+                                            </div>
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="checkbox" value="IED attack" id="ied-attack">
+                                                <label class="form-check-label" for="ied-attack">IED attack</label>
+                                            </div>
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="checkbox" value="Vehicle ramming attack" id="vehicle-ramming-attack">
+                                                <label class="form-check-label" for="vehicle-ramming-attack">Vehicle ramming attack</label>
+                                            </div>
+                                        </div>
+                                        <button type="button" class="btn btn-primary mt-3" onclick="addThreats()">Add to Assessment</button>
+                                    </form>
+                                </div>
+                            </div>
+
+                            <!-- Pop-up for Hazard Library -->
+                            <div id="popup-hazard-library" class="popup">
+                                <div class="popup-content">
+                                    <span class="close" onclick="closePopup('popup-hazard-library')">&times;</span>
+                                    <h2>Load from Hazard Library</h2>
+                                    <form id="hazard-library-form">
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="checkbox" value="Ineffectual Strategy" id="ineffectual-strategy">
+                                            <label class="form-check-label" for="ineffectual-strategy">Ineffectual Strategy</label>
+                                        </div>
+                                        <div class="ml-4">
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="checkbox" value="Poor Financial Planning" id="poor-financial-planning">
+                                                <label class="form-check-label" for="poor-financial-planning">Poor Financial Planning</label>
+                                            </div>
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="checkbox" value="Ineffective Succession" id="ineffective-succession">
+                                                <label class="form-check-label" for="ineffective-succession">Ineffective Succession</label>
+                                            </div>
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="checkbox" value="Sluggish Response to Change" id="sluggish-response-to-change">
+                                                <label class="form-check-label" for="sluggish-response-to-change">Sluggish Response to Change</label>
+                                            </div>
+                                        </div>
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="checkbox" value="Non-Compliance" id="non-compliance">
+                                            <label class="form-check-label" for="non-compliance">Non-Compliance</label>
+                                        </div>
+                                        <div class="ml-4">
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="checkbox" value="Deliberate non-compliance" id="deliberate-non-compliance">
+                                                <label class="form-check-label" for="deliberate-non-compliance">Deliberate non-compliance</label>
+                                            </div>
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="checkbox" value="Inadvertent non-compliance" id="inadvertent-non-compliance">
+                                                <label class="form-check-label" for="inadvertent-non-compliance">Inadvertent non-compliance</label>
+                                            </div>
+                                        </div>
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="checkbox" value="Disrupted Supply" id="disrupted-supply">
+                                            <label class="form-check-label" for="disrupted-supply">Disrupted Supply</label>
+                                        </div>
+                                        <div class="ml-4">
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="checkbox" value="Major Supplier Failure" id="major-supplier-failure">
+                                                <label class="form-check-label" for="major-supplier-failure">Major Supplier Failure</label>
+                                            </div>
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="checkbox" value="Trade/Commercial Dispute" id="trade-commercial-dispute">
+                                                <label class="form-check-label" for="trade-commercial-dispute">Trade/Commercial Dispute</label>
+                                            </div>
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="checkbox" value="Non-Delivery" id="non-delivery">
+                                                <label class="form-check-label" for="non-delivery">Non-Delivery</label>
+                                            </div>
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="checkbox" value="Defective Products" id="defective-products">
+                                                <label class="form-check-label" for="defective-products">Defective Products</label>
+                                            </div>
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="checkbox" value="Industrial Action" id="industrial-action">
+                                                <label class="form-check-label" for="industrial-action">Industrial Action</label>
+                                            </div>
+                                        </div>
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="checkbox" value="Economic Uncertainty" id="economic-uncertainty">
+                                            <label class="form-check-label" for="economic-uncertainty">Economic Uncertainty</label>
+                                        </div>
+                                        <div class="ml-4">
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="checkbox" value="Slump in Demand" id="slump-in-demand">
+                                                <label class="form-check-label" for="slump-in-demand">Slump in Demand</label>
+                                            </div>
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="checkbox" value="Regulatory Changes" id="regulatory-changes">
+                                                <label class="form-check-label" for="regulatory-changes">Regulatory Changes</label>
+                                            </div>
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="checkbox" value="Currency Fluctuation" id="currency-fluctuation">
+                                                <label class="form-check-label" for="currency-fluctuation">Currency Fluctuation</label>
+                                            </div>
+                                        </div>
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="checkbox" value="Environment" id="environment">
+                                            <label class="form-check-label" for="environment">Environment</label>
+                                        </div>
+                                        <div class="ml-4">
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="checkbox" value="Land Slip" id="land-slip">
+                                                <label class="form-check-label" for="land-slip">Land Slip</label>
+                                            </div>
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="checkbox" value="Earthquake" id="earthquake">
+                                                <label class="form-check-label" for="earthquake">Earthquake</label>
+                                            </div>
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="checkbox" value="Wildfire/Bushfire" id="wildfire-bushfire">
+                                                <label class="form-check-label" for="wildfire-bushfire">Wildfire/Bushfire</label>
+                                            </div>
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="checkbox" value="Sunstroke" id="sunstroke">
+                                                <label class="form-check-label" for="sunstroke">Sunstroke</label>
+                                            </div>
+                                        </div>
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="checkbox" value="Equipment" id="equipment">
+                                            <label class="form-check-label" for="equipment">Equipment</label>
+                                        </div>
+                                        <div class="ml-4">
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="checkbox" value="Inappropriate Use" id="inappropriate-use">
+                                                <label class="form-check-label" for="inappropriate-use">Inappropriate Use</label>
+                                            </div>
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="checkbox" value="Noise Exposure" id="noise-exposure">
+                                                <label class="form-check-label" for="noise-exposure">Noise Exposure</label>
+                                            </div>
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="checkbox" value="Burns & Abrasions" id="burns-abrasions">
+                                                <label class="form-check-label" for="burns-abrasions">Burns & Abrasions</label>
+                                            </div>
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="checkbox" value="Malfunction" id="malfunction">
+                                                <label class="form-check-label" for="malfunction">Malfunction</label>
+                                            </div>
+                                        </div>
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="checkbox" value="Weather" id="weather">
+                                            <label class="form-check-label" for="weather">Weather</label>
+                                        </div>
+                                        <div class="ml-4">
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="checkbox" value="Drought" id="drought">
+                                                <label class="form-check-label" for="drought">Drought</label>
+                                            </div>
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="checkbox" value="Flooding" id="flooding">
+                                                <label class="form-check-label" for="flooding">Flooding</label>
+                                            </div>
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="checkbox" value="Major Storm" id="major-storm">
+                                                <label class="form-check-label" for="major-storm">Major Storm</label>
+                                            </div>
+                                        </div>
+                                        <button type="button" class="btn btn-primary mt-3" onclick="addHazards()">Add to Assessment</button>
+                                    </form>
+                                </div>
+                            </div>
+
+                            <script>
+                                function openPopup(popupId) {
+                                    document.getElementById(popupId).style.display = "block";
+                                }
+
+                                function closePopup(popupId) {
+                                    document.getElementById(popupId).style.display = "none";
+                                }
+
+                                function addThreats() {
+                                    const threatTable = document.getElementById('threat-hazard-table');
+                                    const checkboxes = document.querySelectorAll('#threat-library-form .form-check-input:checked');
+
+                                    checkboxes.forEach(checkbox => {
+                                        const row = document.createElement('tr');
+                                        const sourceCell = document.createElement('td');
+                                        const actorCell = document.createElement('td');
+                                        const eventCell = document.createElement('td');
+                                        const assetsCell = document.createElement('td');
+                                        const ratingCell = document.createElement('td');
+                                        const descriptionCell = document.createElement('td');
+                                        const controlsCell = document.createElement('td');
+
+                                        sourceCell.innerHTML = 'Threat';
+                                        actorCell.innerHTML = checkbox.value;
+                                        eventCell.innerHTML = `<input type="text" name="events[]" class="form-control">`;
+                                        assetsCell.innerHTML = `<select name="assets[]" class="form-control">
+                                            {% for asset in asset_assessments %}
+                                                <option value="{{ asset.asset }}">{{ asset.asset }}</option>
+                                            {% endfor %}
+                                        </select>`;
+                                        ratingCell.innerHTML = `<button type="button" class="btn btn-secondary" onclick="openRatingPopup(this)">Set Rating</button>
+                                                                <input type="hidden" name="ratings[]" class="rating-value">`;
+                                        descriptionCell.innerHTML = `<input type="text" name="descriptions[]" class="form-control">`;
+                                        controlsCell.innerHTML = `<input type="text" name="current_controls[]" class="form-control">`;
+
+                                        row.appendChild(sourceCell);
+                                        row.appendChild(actorCell);
+                                        row.appendChild(eventCell);
+                                        row.appendChild(assetsCell);
+                                        row.appendChild(ratingCell);
+                                        row.appendChild(descriptionCell);
+                                        row.appendChild(controlsCell);
+                                        threatTable.appendChild(row);
+                                    });
+
+                                    closePopup('popup-threat-library');
+                                }
+
+                                function addHazards() {
+                                    const hazardTable = document.getElementById('threat-hazard-table');
+                                    const checkboxes = document.querySelectorAll('#hazard-library-form .form-check-input:checked');
+
+                                    checkboxes.forEach(checkbox => {
+                                        const row = document.createElement('tr');
+                                        const sourceCell = document.createElement('td');
+                                        const actorCell = document.createElement('td');
+                                        const eventCell = document.createElement('td');
+                                        const assetsCell = document.createElement('td');
+                                        const ratingCell = document.createElement('td');
+                                        const descriptionCell = document.createElement('td');
+                                        const controlsCell = document.createElement('td');
+
+                                        sourceCell.innerHTML = 'Hazard';
+                                        actorCell.innerHTML = checkbox.value;
+                                        eventCell.innerHTML = `<input type="text" name="events[]" class="form-control">`;
+                                        assetsCell.innerHTML = `<select name="assets[]" class="form-control">
+                                            {% for asset in asset_assessments %}
+                                                <option value="{{ asset.asset }}">{{ asset.asset }}</option>
+                                            {% endfor %}
+                                        </select>`;
+                                        ratingCell.innerHTML = `<button type="button" class="btn btn-secondary" onclick="openRatingPopup(this)">Set Rating</button>
+                                                                <input type="hidden" name="ratings[]" class="rating-value">`;
+                                        descriptionCell.innerHTML = `<input type="text" name="descriptions[]" class="form-control">`;
+                                        controlsCell.innerHTML = `<input type="text" name="current_controls[]" class="form-control">`;
+
+                                        row.appendChild(sourceCell);
+                                        row.appendChild(actorCell);
+                                        row.appendChild(eventCell);
+                                        row.appendChild(assetsCell);
+                                        row.appendChild(ratingCell);
+                                        row.appendChild(descriptionCell);
+                                        row.appendChild(controlsCell);
+                                        hazardTable.appendChild(row);
+                                    });
+
+                                    closePopup('popup-hazard-library');
+                                }
+
+                                function openRatingPopup(button) {
+                                    // Implement the logic to open and handle the rating popup
+                                    // For simplicity, we will just prompt for a rating value
+                                    const rating = prompt("Enter rating value:");
+                                    if (rating) {
+                                        const ratingInput = button.nextElementSibling;
+                                        ratingInput.value = rating;
+                                    }
+                                }
+                            </script>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>
