@@ -1,0 +1,893 @@
+{% extends "base.html" %}
+{% block content %}
+<h2>Risk Assessment Form</h2>
+
+<!-- Pop-up Buttons at the Top -->
+<div class="container mb-4">
+    <div class="row justify-content-between">
+        <div class="col text-center">
+            <button type="button" class="btn btn-secondary" data-toggle="modal" data-target="#parametersModal">Asset Criticality</button>
+        </div>
+        <div class="col text-center">
+            <button type="button" class="btn btn-secondary" data-toggle="modal" data-target="#threatCriteriaModal">Threat Criteria</button>
+        </div>
+        <div class="col text-center">
+            <button type="button" class="btn btn-secondary" data-toggle="modal" data-target="#hazardCriteriaModal">Hazard Criteria</button>
+        </div>
+        <div class="col text-center">
+            <button type="button" class="btn btn-secondary" data-toggle="modal" data-target="#controlEffectivenessCriteriaModal">Control Effectiveness Criteria</button>
+        </div>
+        <div class="col text-center">
+            <button type="button" class="btn btn-secondary" data-toggle="modal" data-target="#riskAssessmentCriteriaModal">Risk Assessment Criteria</button>
+        </div>
+    </div>
+</div>
+
+<form id="riskForm" action="{{ url_for('generate_report') }}" method="post" class="form-group">
+    <!-- General Information Section -->
+    <fieldset class="border p-2">
+        <legend class="w-auto">General Information</legend>
+        <div class="form-group">
+            <label for="prepared_for">Prepared for:</label>
+            <input type="text" id="prepared_for" name="prepared_for" class="form-control" required>
+        </div>
+        <div class="form-group">
+            <label for="prepared_by">Prepared By:</label>
+            <input type="text" id="prepared_by" name="prepared_by" class="form-control" required>
+        </div>
+        <div class="form-group">
+            <label for="scope">Scope:</label>
+            <textarea id="scope" name="scope" class="form-control" required></textarea>
+        </div>
+    </fieldset>
+    
+    <br>
+    
+    <!-- Objectives and Risk Details Section -->
+    <fieldset class="border p-2">
+        <legend class="w-auto">Objectives and Risk Details</legend>
+        <div class="form-group">
+            <label for="objectives">Objectives:</label>
+            <textarea id="objectives" name="objectives" class="form-control" required></textarea>
+        </div>
+        <div class="form-group">
+            <label for="risk_details">Risk Details:</label>
+            <textarea id="risk_details" name="risk_details" class="form-control" required></textarea>
+        </div>
+    </fieldset>
+    
+    <br>
+    
+    <!-- Recommendations Section -->
+    <fieldset class="border p-2">
+        <legend class="w-auto">Recommendations</legend>
+        <div class="form-group">
+            <label for="recommendations">Recommendations:</label>
+            <textarea id="recommendations" name="recommendations" class="form-control" required></textarea>
+        </div>
+    </fieldset>
+    
+    <br>
+    
+    <button type="submit" class="btn btn-primary">Generate Report</button>
+</form>
+
+<!-- Existing modals... -->
+<!-- Asset Criticality Modal -->
+<div class="modal fade" id="parametersModal" tabindex="-1" aria-labelledby="parametersModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="parametersModalLabel">Asset Criticality</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <table class="table table-bordered">
+          <thead>
+            <tr>
+              <th scope="col">Criticality Rating</th>
+              <th scope="col">Criteria</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td contenteditable="true" class="criticality">VITAL</td>
+              <td contenteditable="true" class="criteria">
+                <ul>
+                  <li>Alternative services and/or facilities cannot be provided if asset is lost or severely damaged.</li>
+                  <li>Loss or compromise will result in abandonment or long-term cessation of the functions or core business practices.</li>
+                  <li>Loss or compromise will have a debilitating impact on the reputation of the organisation (international, permanent).</li>
+                </ul>
+              </td>
+            </tr>
+            <tr>
+              <td contenteditable="true" class="criticality">KEY</td>
+              <td contenteditable="true" class="criteria">
+                <ul>
+                  <li>Major restrictions to core business practices will result if asset is lost or severely damaged.</li>
+                  <li>Loss or compromise will result in long-term cessation/disruption of core business.</li>
+                  <li>Loss or compromise will have a major, widespread impact on the organisation’s reputation (national, sustained).</li>
+                </ul>
+              </td>
+            </tr>
+            <tr>
+              <td contenteditable="true" class="criticality">IMPORTANT</td>
+              <td contenteditable="true" class="criteria">
+                <ul>
+                  <li>Some minor restrictions to core business practices will result if asset is lost or severely damaged.</li>
+                  <li>Loss or compromise will result in short-term cessation/disruption of core business.</li>
+                  <li>Loss or compromise may have an impact on the organisation’s reputation (regional, short-term).</li>
+                </ul>
+              </td>
+            </tr>
+            <tr>
+              <td contenteditable="true" class="criticality">SUPPORTING</td>
+              <td contenteditable="true" class="criteria">
+                <ul>
+                  <li>Business as usual services and/or facilities can be provided if asset is lost or severely damaged.</li>
+                  <li>Loss or compromise will not result in cessation/disruption of core business.</li>
+                  <li>Loss or compromise will have no discernible impact on the organisation’s reputation.</li>
+                </ul>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+        <button type="button" class="btn btn-primary" id="saveParameters">Save to Assessment</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Threat Criteria Modal -->
+<div class="modal fade" id="threatCriteriaModal" tabindex="-1" aria-labelledby="threatCriteriaModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="threatCriteriaModalLabel">Threat Criteria</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <!-- Tabs -->
+        <ul class="nav nav-tabs" id="threatCriteriaTabs" role="tablist">
+          <li class="nav-item">
+            <a class="nav-link active" id="intent-tab" data-toggle="tab" href="#intent" role="tab" aria-controls="intent" aria-selected="true">Intent</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" id="capability-tab" data-toggle="tab" href="#capability" role="tab" aria-controls="capability" aria-selected="false">Capability</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" id="threatTolerance-tab" data-toggle="tab" href="#threatTolerance" role="tab" aria-controls="threatTolerance" aria-selected="false">Threat Tolerance</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" id="threatMatrix-tab" data-toggle="tab" href="#threatMatrix" role="tab" aria-controls="threatMatrix" aria-selected="false">Threat Matrix</a>
+          </li>
+        </ul>
+        <div class="tab-content" id="threatCriteriaTabsContent">
+          <div class="tab-pane fade show active" id="intent" role="tabpanel" aria-labelledby="intent-tab">
+            <!-- Intent Table -->
+            <table class="table table-bordered mt-3">
+              <thead>
+                <tr>
+                  <th scope="col">Intent Rating</th>
+                  <th scope="col">Intent Descriptor</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td contenteditable="true" class="rating">None</td>
+                  <td contenteditable="true" class="description">
+                    <ul>
+                      <li>No desire - absence of drive and purpose.</li>
+                      <li>Threat actor would not believe they have the capacity and competence to perpetrate the Threat Act.</li>
+                    </ul>
+                  </td>
+                </tr>
+                <tr>
+                  <td contenteditable="true" class="rating">Implied</td>
+                  <td contenteditable="true" class="description">
+                    <ul>
+                      <li>Motivated, but with some flexibility in terms of method and capacity for compromise.</li>
+                      <li>Threat actor would have reasonable expectations of successfully perpetrating the Threat Act attack based on their capacity and competence.</li>
+                    </ul>
+                  </td>
+                </tr>
+                <tr>
+                  <td contenteditable="true" class="rating">Expressed</td>
+                  <td contenteditable="true" class="description">
+                    <ul>
+                      <li>Extreme motivations with few if any limitations on perpetrating the Threat Act and no room for compromise.</li>
+                      <li>Threat actor would have a very high expectation of successfully perpetrating the Threat Act.</li>
+                    </ul>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="tab-pane fade" id="capability" role="tabpanel" aria-labelledby="capability-tab">
+            <!-- Capability Table -->
+            <table class="table table-bordered mt-3">
+              <thead>
+                <tr>
+                  <th scope="col">Capability Rating</th>
+                  <th scope="col">Capability Descriptor</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td contenteditable="true" class="rating">Extensive</td>
+                  <td contenteditable="true" class="description">
+                    <ul>
+                      <li>Fully funded and resourced.</li>
+                      <li>Highly skilled and comprehensively trained.</li>
+                    </ul>
+                  </td>
+                </tr>
+                <tr>
+                  <td contenteditable="true" class="rating">Moderate</td>
+                  <td contenteditable="true" class="description">
+                    <ul>
+                      <li>Moderate level of funding and/or resources.</li>
+                      <li>Moderate level of training and skills.</li>
+                    </ul>
+                  </td>
+                </tr>
+                <tr>
+                  <td contenteditable="true" class="rating">Low</td>
+                  <td contenteditable="true" class="description">
+                    <ul>
+                      <li>Few if any resources and/or funding.</li>
+                      <li>No knowledge or training.</li>
+                    </ul>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="tab-pane fade" id="threatTolerance" role="tabpanel" aria-labelledby="threatTolerance-tab">
+            <!-- Threat Tolerance Table -->
+            <table class="table table-bordered mt-3">
+              <thead>
+                <tr>
+                  <th scope="col">Threat Tolerance</th>
+                  <th scope="col">Threat Description</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td contenteditable="true" class="tolerance">High</td>
+                  <td contenteditable="true" class="description">
+                    <ul>
+                      <li>Threat Acts rated at this level must appear within the Risk Register.</li>
+                    </ul>
+                  </td>
+                </tr>
+                <tr>
+                  <td contenteditable="true" class="tolerance">Medium</td>
+                  <td contenteditable="true" class="description">
+                    <ul>
+                      <li>Threat Acts rated at this level (and higher) must appear within the Risk Register.</li>
+                    </ul>
+                  </td>
+                </tr>
+                <tr>
+                  <td contenteditable="true" class="tolerance">Low</td>
+                  <td contenteditable="true" class="description">
+                    <ul>
+                      <li>Threat Acts rated at this level (and higher) must appear within the Risk Register.</li>
+                    </ul>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="tab-pane fade" id="threatMatrix" role="tabpanel" aria-labelledby="threatMatrix-tab">
+            <!-- Threat Matrix Table -->
+            <table class="table table-bordered mt-3">
+              <thead>
+                <tr>
+                  <th scope="col">Capability</th>
+                  <th scope="col">None</th>
+                  <th scope="col">Implied</th>
+                  <th scope="col">Expressed</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td contenteditable="true" class="capability">Extensive</td>
+                  <td contenteditable="true" class="risk"></td>
+                  <td contenteditable="true" class="risk">Medium</td>
+                  <td contenteditable="true" class="risk">High</td>
+                </tr>
+                <tr>
+                  <td contenteditable="true" class="capability">Moderate</td>
+                  <td contenteditable="true" class="risk">Low</td>
+                  <td contenteditable="true" class="risk">Medium</td>
+                  <td contenteditable="true" class="risk">High</td>
+                </tr>
+                <tr>
+                  <td contenteditable="true" class="capability">Low</td>
+                  <td contenteditable="true" class="risk">Low</td>
+                  <td contenteditable="true" class="risk">Low</td>
+                  <td contenteditable="true" class="risk">Medium</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+        <button type="button" class="btn btn-primary" id="saveThreatCriteria">Save to Assessment</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Hazard Criteria Modal -->
+<div class="modal fade" id="hazardCriteriaModal" tabindex="-1" aria-labelledby="hazardCriteriaModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="hazardCriteriaModalLabel">Hazard Criteria</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <!-- Hazard Criteria Table -->
+        <table class="table table-bordered">
+          <thead>
+            <tr>
+              <th scope="col">Event Rating</th>
+              <th scope="col">Criteria</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td contenteditable="true" class="event-rating">Critical</td>
+              <td contenteditable="true" class="criteria">
+                <ul>
+                  <li>Event would be of rigorous intensity.</li>
+                  <li>Event could materialise with minimal warning.</li>
+                  <li>Event would be prolonged.</li>
+                  <li>The event is within close proximity.</li>
+                  <li>The event would be highly volatile.</li>
+                  <li>The event would be highly persistent.</li>
+                </ul>
+              </td>
+            </tr>
+            <tr>
+              <td contenteditable="true" class="event-rating">Emerging</td>
+              <td contenteditable="true" class="criteria">
+                <ul>
+                  <li>Event would be of moderate intensity.</li>
+                  <li>Event could materialise with manageable warning.</li>
+                  <li>Event would be of moderate duration.</li>
+                  <li>The event is within intermediate proximity.</li>
+                  <li>The event would be of medium volatility.</li>
+                  <li>The event would be moderately persistent.</li>
+                </ul>
+              </td>
+            </tr>
+            <tr>
+              <td contenteditable="true" class="event-rating">Benign</td>
+              <td contenteditable="true" class="criteria">
+                <ul>
+                  <li>Event would be of low intensity.</li>
+                  <li>Event could materialise with ample warning.</li>
+                  <li>Event would be short-term.</li>
+                  <li>The event is distant.</li>
+                  <li>The event would be of low volatility.</li>
+                  <li>The event would not be persistent.</li>
+                </ul>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+
+        <!-- Event Tolerance Table -->
+        <table class="table table-bordered mt-3">
+          <thead>
+            <tr>
+              <th scope="col">Event Tolerance</th>
+              <th scope="col">Criteria</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td contenteditable="true" class="event-tolerance">Critical</td>
+              <td contenteditable="true" class="criteria">Hazard events rated at this level must appear within the Risk Register.</td>
+            </tr>
+            <tr>
+              <td contenteditable="true" class="event-tolerance">Emerging</td>
+              <td contenteditable="true" class="criteria">Hazard events rated at this level (and higher) must appear within the Risk Register.</td>
+            </tr>
+            <tr>
+              <td contenteditable="true" class="event-tolerance">Benign</td>
+              <td contenteditable="true" class="criteria">Hazard events rated at this level (and higher) must appear within the Risk Register.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+        <button type="button" class="btn btn-primary" id="saveHazardCriteria">Save to Assessment</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Control Effectiveness Criteria Modal -->
+<div class="modal fade" id="controlEffectivenessCriteriaModal" tabindex="-1" aria-labelledby="controlEffectivenessCriteriaModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="controlEffectivenessCriteriaModalLabel">Control Effectiveness Criteria</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <!-- Control Effectiveness Criteria Table -->
+        <table class="table table-bordered">
+          <thead>
+            <tr>
+              <th scope="col">Rating</th>
+              <th scope="col">Criteria</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td contenteditable="true" class="rating">ADEQUATE</td>
+              <td contenteditable="true" class="criteria">
+                <ul>
+                  <li>Control elements are well designed to address threats.</li>
+                  <li>Nothing more to be done except review and monitor control elements.</li>
+                  <li>There are no doubts that the controls are the most appropriate for the task.</li>
+                </ul>
+              </td>
+            </tr>
+            <tr>
+              <td contenteditable="true" class="rating">MODERATE</td>
+              <td contenteditable="true" class="criteria">
+                <ul>
+                  <li>Most control elements are designed correctly, in place and effective.</li>
+                  <li>Some more work should be considered to improve operational effectiveness.</li>
+                  <li>There may be doubts around operational effectiveness and reliability.</li>
+                </ul>
+              </td>
+            </tr>
+            <tr>
+              <td contenteditable="true" class="rating">INADEQUATE</td>
+              <td contenteditable="true" class="criteria">
+                <ul>
+                  <li>Controls do not address threats effectively.</li>
+                  <li>There are significant control flaws or no credible controls at all.</li>
+                  <li>There are obvious doubts that the controls will work as intended.</li>
+                </ul>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+        <button type="button" class="btn btn-primary" id="saveControlEffectivenessCriteria">Save to Assessment</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Risk Assessment Criteria Modal -->
+<div class="modal fade" id="riskAssessmentCriteriaModal" tabindex="-1" aria-labelledby="riskAssessmentCriteriaModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="riskAssessmentCriteriaModalLabel">Risk Assessment Criteria</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <!-- Tabs -->
+        <ul class="nav nav-tabs" id="riskAssessmentCriteriaTabs" role="tablist">
+          <li class="nav-item">
+            <a class="nav-link active" id="consequenceCriteria-tab" data-toggle="tab" href="#consequenceCriteria" role="tab" aria-controls="consequenceCriteria" aria-selected="true">Consequence Criteria</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" id="likelihoodCriteria-tab" data-toggle="tab" href="#likelihoodCriteria" role="tab" aria-controls="likelihoodCriteria" aria-selected="false">Likelihood Criteria</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" id="riskTolerance-tab" data-toggle="tab" href="#riskTolerance" role="tab" aria-controls="riskTolerance" aria-selected="false">Risk Tolerance</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" id="riskMatrix-tab" data-toggle="tab" href="#riskMatrix" role="tab" aria-controls="riskMatrix" aria-selected="false">Risk Matrix</a>
+          </li>
+        </ul>
+        <div class="tab-content" id="riskAssessmentCriteriaTabsContent">
+          <div class="tab-pane fade show active" id="consequenceCriteria" role="tabpanel" aria-labelledby="consequenceCriteria-tab">
+            <!-- Consequence Criteria Table -->
+            <table class="table table-bordered mt-3">
+              <thead>
+                <tr>
+                  <th scope="col">Rating</th>
+                  <th scope="col">Criteria</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td contenteditable="true" class="rating">Negligible</td>
+                  <td contenteditable="true" class="criteria">
+                    <ul>
+                      <li>Minor injury or first aid treatment.</li>
+                      <li>Compromise of information otherwise available in the public domain.</li>
+                      <li>1% of budget (organizational, division or project budget as relevant).</li>
+                      <li>Local mention only. Quickly forgotten. Freedom to operate unaffected. Self-improvement review required.</li>
+                      <li>Minor issues impact. Minimal impact on non-core operations. The impact can be dealt with by routine operations.</li>
+                      <li>Minor damage or vandalism to asset.</li>
+                    </ul>
+                  </td>
+                </tr>
+                <tr>
+                  <td contenteditable="true" class="rating">Minor</td>
+                  <td contenteditable="true" class="criteria">
+                    <ul>
+                      <li>Injury requiring treatment by medical practitioner and/or lost time from workplace.</li>
+                      <li>Minor compromise of information sensitive to internal or sub-unit interest.</li>
+                      <li>2-5% of annual budget.</li>
+                      <li>Scrutiny by executive, internal committees or internal audit to prevent escalation. Short-term local media concerns, some impact on local level activities.</li>
+                      <li>Some impact on organization capability in terms of delays, systems quality but able to be dealt with at operational level.</li>
+                      <li>Minor damage or loss of &lt;5% of total assets.</li>
+                    </ul>
+                  </td>
+                </tr>
+                <tr>
+                  <td contenteditable="true" class="rating">Moderate</td>
+                  <td contenteditable="true" class="criteria">
+                    <ul>
+                      <li>Major injury/hospitalisation.</li>
+                      <li>Compromise of information sensitive to organization operation.</li>
+                      <li>5-10% of annual budget.</li>
+                      <li>Persistent internal concern. Scrutiny required by external agencies. Long term "brand" impact.</li>
+                      <li>Impact on organization resulting in reduced performance such that targets are not met. Organization existence is not threatened, but could be subject to significant review.</li>
+                      <li>Damage or loss of 20% of assets.</li>
+                    </ul>
+                  </td>
+                </tr>
+                <tr>
+                  <td contenteditable="true" class="rating">Major</td>
+                  <td contenteditable="true" class="criteria">
+                    <ul>
+                      <li>Single death or multiple major injuries.</li>
+                      <li>Compromise of information sensitive to organization interests.</li>
+                      <li>10% of project or organizational annual budget.</li>
+                      <li>Persistent intense national public, political and media scrutiny. Long term "brand" impact. Major operations severely restricted.</li>
+                      <li>Breakdown of key activities etc., leading to reduction in business performance (e.g. service delays, revenue loss, client dissatisfaction, legislative breaches).</li>
+                      <li>Extensive damage or loss of &gt;50% of assets.</li>
+                    </ul>
+                  </td>
+                </tr>
+                <tr>
+                  <td contenteditable="true" class="rating">Catastrophic</td>
+                  <td contenteditable="true" class="criteria">
+                    <ul>
+                      <li>Multiple deaths.</li>
+                      <li>Compromise of information with significant ongoing impact.</li>
+                      <li>&gt;20% of project or organizational annual budget.</li>
+                      <li>Intense national concern, government inquiry or sustained adverse national/international media. "Brand" significantly affects organization abilities.</li>
+                      <li>Protracted unavailability of critical skills/people. Critical failure(s) preventing core activities from being performed. Survival of the project/activity/organization is threatened.</li>
+                      <li>Destruction or complete loss of &gt;50% of assets.</li>
+                    </ul>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="tab-pane fade" id="likelihoodCriteria" role="tabpanel" aria-labelledby="likelihoodCriteria-tab">
+            <!-- Likelihood Criteria Table -->
+            <table class="table table-bordered mt-3">
+              <thead>
+                <tr>
+                  <th scope="col">Likelihood Rating</th>
+                  <th scope="col">Likelihood Descriptor</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td contenteditable="true" class="likelihood-rating">Certain</td>
+                  <td contenteditable="true" class="likelihood-descriptor">
+                    <ul>
+                      <li>Occurs on an annual basis and will happen again in the short term.</li>
+                    </ul>
+                  </td>
+                </tr>
+                <tr>
+                  <td contenteditable="true" class="likelihood-rating">Likely</td>
+                  <td contenteditable="true" class="likelihood-descriptor">
+                    <ul>
+                      <li>Has occurred in last few years within the organization or something has occurred that will cause it to happen in the short term.</li>
+                    </ul>
+                  </td>
+                </tr>
+                <tr>
+                  <td contenteditable="true" class="likelihood-rating">Possible</td>
+                  <td contenteditable="true" class="likelihood-descriptor">
+                    <ul>
+                      <li>Has occurred at least once within the organization and is likely to occur again in the medium term.</li>
+                    </ul>
+                  </td>
+                </tr>
+                <tr>
+                  <td contenteditable="true" class="likelihood-rating">Unlikely</td>
+                  <td contenteditable="true" class="likelihood-descriptor">
+                    <ul>
+                      <li>Is possible but has not occurred to date and is considered to have less than 1% chance of occurring within the organization.</li>
+                    </ul>
+                  </td>
+                </tr>
+                <tr>
+                  <td contenteditable="true" class="likelihood-rating">Rare</td>
+                  <td contenteditable="true" class="likelihood-descriptor">
+                    <ul>
+                      <li>Has never occurred within the organization but has occurred infrequently elsewhere and it is possible that it could occur in the medium term.</li>
+                    </ul>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="tab-pane fade" id="riskTolerance" role="tabpanel" aria-labelledby="riskTolerance-tab">
+            <!-- Risk Tolerance Table -->
+            <table class="table table-bordered mt-3">
+              <thead>
+                <tr>
+                  <th scope="col">Risk Tolerance</th>
+                  <th scope="col">Risk Treatment Requirements</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td contenteditable="true" class="risk-tolerance">Extreme</td>
+                  <td contenteditable="true" class="risk-treatment-requirements">
+                    <ul>
+                      <li>Risk cannot be justified on any grounds - immediate risk treatment or avoidance is mandatory.</li>
+                    </ul>
+                  </td>
+                </tr>
+                <tr>
+                  <td contenteditable="true" class="risk-tolerance">High</td>
+                  <td contenteditable="true" class="risk-treatment-requirements">
+                    <ul>
+                      <li>Risk exceeds the organization’s tolerance threshold and must be reduced.</li>
+                    </ul>
+                  </td>
+                </tr>
+                <tr>
+                  <td contenteditable="true" class="risk-tolerance">Medium</td>
+                  <td contenteditable="true" class="risk-treatment-requirements">
+                    <ul>
+                      <li>Risk should be reduced if cost effective to do so. If not monitoring arrangements must be established and the risk must be reviewed periodically.</li>
+                    </ul>
+                  </td>
+                </tr>
+                <tr>
+                  <td contenteditable="true" class="risk-tolerance">Low</td>
+                  <td contenteditable="true" class="risk-treatment-requirements">
+                    <ul>
+                      <li>Risk is within acceptable tolerances and should be monitored and reviewed for changes.</li>
+                    </ul>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="tab-pane fade" id="riskMatrix" role="tabpanel" aria-labelledby="riskMatrix-tab">
+            <!-- Risk Matrix Table -->
+            <table class="table table-bordered mt-3">
+              <thead>
+                <tr>
+                  <th scope="col">Likelihood</th>
+                  <th scope="col">Negligible</th>
+                  <th scope="col">Minor</th>
+                  <th scope="col">Moderate</th>
+                  <th scope="col">Major</th>
+                  <th scope="col">Catastrophic</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td contenteditable="true" class="likelihood">Certain</td>
+                  <td contenteditable="true" class="risk">Medium</td>
+                  <td contenteditable="true" class="risk">Medium</td>
+                  <td contenteditable="true" class="risk">High</td>
+                  <td contenteditable="true" class="risk">Extreme</td>
+                  <td contenteditable="true" class="risk">Extreme</td>
+                </tr>
+                <tr>
+                  <td contenteditable="true" class="likelihood">Likely</td>
+                  <td contenteditable="true" class="risk">Low</td>
+                  <td contenteditable="true" class="risk">Medium</td>
+                  <td contenteditable="true" class="risk">High</td>
+                  <td contenteditable="true" class="risk">High</td>
+                  <td contenteditable="true" class="risk">Extreme</td>
+                </tr>
+                <tr>
+                  <td contenteditable="true" class="likelihood">Possible</td>
+                  <td contenteditable="true" class="risk">Low</td>
+                  <td contenteditable="true" class="risk">Low</td>
+                  <td contenteditable="true" class="risk">Medium</td>
+                  <td contenteditable="true" class="risk">High</td>
+                  <td contenteditable="true" class="risk">High</td>
+                </tr>
+                <tr>
+                  <td contenteditable="true" class="likelihood">Unlikely</td>
+                  <td contenteditable="true" class="risk">Low</td>
+                  <td contenteditable="true" class="risk">Low</td>
+                  <td contenteditable="true" class="risk">Medium</td>
+                  <td contenteditable="true" class="risk">Medium</td>
+                  <td contenteditable="true" class="risk">Medium</td>
+                </tr>
+                <tr>
+                  <td contenteditable="true" class="likelihood">Rare</td>
+                  <td contenteditable="true" class="risk">Low</td>
+                  <td contenteditable="true" class="risk">Low</td>
+                  <td contenteditable="true" class="risk">Low</td>
+                  <td contenteditable="true" class="risk">Medium</td>
+                  <td contenteditable="true" class="risk">Medium</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+        <button type="button" class="btn btn-primary" id="saveRiskAssessmentCriteria">Save to Assessment</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+document.getElementById('saveParameters').addEventListener('click', function() {
+    var rows = document.querySelectorAll('#parametersModal .table tbody tr');
+    var assetCriticality = [];
+    rows.forEach(row => {
+        var criticality = row.querySelector('.criticality').innerText;
+        var criteria = row.querySelector('.criteria').innerText;
+        assetCriticality.push({criticality: criticality, criteria: criteria});
+    });
+
+    // Store the asset criticality data in localStorage
+    localStorage.setItem('assetCriticality', JSON.stringify(assetCriticality));
+
+    // Close the modal
+    $('#parametersModal').modal('hide');
+});
+
+document.getElementById('saveThreatCriteria').addEventListener('click', function() {
+    var tabsContent = document.querySelectorAll('#threatCriteriaTabsContent .tab-pane');
+    var threatCriteria = {
+        intent: [],
+        capability: [],
+        threatTolerance: [],
+        threatMatrix: []
+    };
+
+    tabsContent.forEach(tab => {
+        var rows = tab.querySelectorAll('table tbody tr');
+        rows.forEach(row => {
+            var data = {};
+            var cells = row.querySelectorAll('td');
+            cells.forEach((cell, index) => {
+                if (tab.id === 'intent') {
+                    if (index === 0) data.rating = cell.innerText;
+                    if (index === 1) data.description = cell.innerText;
+                    threatCriteria.intent.push(data);
+                } else if (tab.id === 'capability') {
+                    if (index === 0) data.rating = cell.innerText;
+                    if (index === 1) data.description = cell.innerText;
+                    threatCriteria.capability.push(data);
+                } else if (tab.id === 'threatTolerance') {
+                    if (index === 0) data.tolerance = cell.innerText;
+                    if (index === 1) data.description = cell.innerText;
+                    threatCriteria.threatTolerance.push(data);
+                } else if (tab.id === 'threatMatrix') {
+                    if (index === 0) data.capability = cell.innerText;
+                    if (index > 0) data[`intent${index}`] = cell.innerText;
+                    threatCriteria.threatMatrix.push(data);
+                }
+            });
+        });
+    });
+
+    // Store the threat criteria data in localStorage
+    localStorage.setItem('threatCriteria', JSON.stringify(threatCriteria));
+
+    // Close the modal
+    $('#threatCriteriaModal').modal('hide');
+});
+
+document.getElementById('saveHazardCriteria').addEventListener('click', function() {
+    var rows = document.querySelectorAll('#hazardCriteriaModal .table tbody tr');
+    var hazardCriteria = [];
+    rows.forEach(row => {
+        var rating = row.querySelector('.event-rating') ? row.querySelector('.event-rating').innerText : row.querySelector('.event-tolerance').innerText;
+        var criteria = row.querySelector('.criteria').innerText;
+        hazardCriteria.push({rating: rating, criteria: criteria});
+    });
+
+    // Store the hazard criteria data in localStorage
+    localStorage.setItem('hazardCriteria', JSON.stringify(hazardCriteria));
+
+    // Close the modal
+    $('#hazardCriteriaModal').modal('hide');
+});
+
+document.getElementById('saveControlEffectivenessCriteria').addEventListener('click', function() {
+    var rows = document.querySelectorAll('#controlEffectivenessCriteriaModal .table tbody tr');
+    var controlEffectivenessCriteria = [];
+    rows.forEach(row => {
+        var rating = row.querySelector('.rating').innerText;
+        var criteria = row.querySelector('.criteria').innerText;
+        controlEffectivenessCriteria.push({rating: rating, criteria: criteria});
+    });
+
+    // Store the control effectiveness criteria data in localStorage
+    localStorage.setItem('controlEffectivenessCriteria', JSON.stringify(controlEffectivenessCriteria));
+
+    // Close the modal
+    $('#controlEffectivenessCriteriaModal').modal('hide');
+});
+
+document.getElementById('saveRiskAssessmentCriteria').addEventListener('click', function() {
+    var tabsContent = document.querySelectorAll('#riskAssessmentCriteriaTabsContent .tab-pane');
+    var riskAssessmentCriteria = {
+        consequenceCriteria: [],
+        likelihoodCriteria: [],
+        riskTolerance: [],
+        riskMatrix: []
+    };
+
+    tabsContent.forEach(tab => {
+        var rows = tab.querySelectorAll('table tbody tr');
+        rows.forEach(row => {
+            var data = {};
+            var cells = row.querySelectorAll('td');
+            cells.forEach((cell, index) => {
+                if (tab.id === 'consequenceCriteria') {
+                    if (index === 0) data.rating = cell.innerText;
+                    if (index === 1) data.criteria = cell.innerText;
+                    riskAssessmentCriteria.consequenceCriteria.push(data);
+                } else if (tab.id === 'likelihoodCriteria') {
+                    if (index === 0) data.likelihoodRating = cell.innerText;
+                    if (index === 1) data.likelihoodDescriptor = cell.innerText;
+                    riskAssessmentCriteria.likelihoodCriteria.push(data);
+                } else if (tab.id === 'riskTolerance') {
+                    if (index === 0) data.riskTolerance = cell.innerText;
+                    if (index === 1) data.riskTreatmentRequirements = cell.innerText;
+                    riskAssessmentCriteria.riskTolerance.push(data);
+                } else if (tab.id === 'riskMatrix') {
+                    if (index === 0) data.likelihood = cell.innerText;
+                    if (index > 0) data[`consequence${index}`] = cell.innerText;
+                    riskAssessmentCriteria.riskMatrix.push(data);
+                }
+            });
+        });
+    });
+
+    // Store the risk assessment criteria data in localStorage
+    localStorage.setItem('riskAssessmentCriteria', JSON.stringify(riskAssessmentCriteria));
+
+    // Close the modal
+    $('#riskAssessmentCriteriaModal').modal('hide');
+});
+</script>
+{% endblock %}
